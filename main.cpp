@@ -3,9 +3,12 @@
 #include <vector>
 #include <cstdint>
 #include <cmath>
+#include <chrono>
 
 void write_primes_to_file(const std::string& filename)
 {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     std::ofstream file(filename, std::ios::binary);
     if (!file.is_open())
     {
@@ -23,7 +26,6 @@ void write_primes_to_file(const std::string& filename)
     {
         if (sieve[i])
         {
-            std::cout << i << '\r';
             file.write(reinterpret_cast<const char*>(&i), sizeof(uint32_t));    // write primes to file
             for (uint64_t j = i * i; j <= limit; j += i)                        // sieve out the numbers
             {
@@ -32,30 +34,33 @@ void write_primes_to_file(const std::string& filename)
         }
     }
 
+    auto sieve_finish_time = std::chrono::high_resolution_clock::now();
+    std::cout << "Finished sieving. Now writing to file." << std::endl;
     file.flush();                                                               // flush for safety
 
     for (i; i <= limit && i > sqlimit; ++i)                                     // Overflow-safe
     {
         if (sieve[i])
-        {            
+        {
             file.write(reinterpret_cast<const char*>(&i), sizeof(uint32_t));    // write the rest of the primes to file
         }
-        if (i % 1048576 == 1)
-        {
-            std::cout << i << '\r';
-        }
-
     }
 
     file.close();
+
+    auto finish_time = std::chrono::high_resolution_clock::now();
+    auto sieve_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(sieve_finish_time - start_time).count();
+    auto write_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - sieve_finish_time).count();
+    auto total_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - start_time).count();
+    std::cout << "Prime numbers up to 2^32-1 written to \"" << filename
+              << "\"\nSieving Time:\t" << sieve_duration
+              << "ns\nWriting Time:\t" << write_duration
+              << "ns\nTotal Time:\t" << total_duration << "ns" << std::endl;
 }
 
 int main()
 {
     const std::string filename = "primes.bin";
     write_primes_to_file(filename);
-
-    std::cout << "Prime numbers up to 2^32-1 written to " << filename << std::endl;
-
     return 0;
 }
