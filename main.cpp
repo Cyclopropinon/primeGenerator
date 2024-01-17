@@ -37,9 +37,14 @@ void write_primes_to_file(const std::string& filename)
     for (i; i <= limit; ++i)
     {
         if (sieve[i])
-        {
+        {            
             file.write(reinterpret_cast<const char*>(&i), sizeof(uint32_t));    // write the rest of the primes to file
         }
+        if (i % 32768 == 1)
+        {
+            std::cout << i << '\r';
+        }
+
     }
 
     file.close();
