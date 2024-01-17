@@ -58,8 +58,24 @@ void write_primes_to_file(const std::string& filename)
               << "ns\nTotal Time:\t" << total_duration << "ns" << std::endl;
 }
 
+void writeReadme()
+{
+    std::ofstream readmeFile("README.md");
+    if (!readmeFile.is_open())
+    {
+        std::cerr << "Error opening file for writing.\n";
+        return;
+    }
+    readmeFile << "# How to use the Prime numbers\n"
+               << "The File is split into chunks of 4 bytes (= 32 bit), each containing a 32bit unsigned integer\n"
+               << "The constant size of the chunks allows for a quick access of the nth prime at byte 4n-3 to 4n\n"
+               << "It is possible to read them \"by hand\". Open the file in your favourite Hexeditor (e.g. Hexcurse) and read the numbers in chunks of 4 byte :)";
+    readmeFile.close();            
+}
+
 int main()
 {
+    writeReadme();
     const std::string filename = "primes.bin";
     write_primes_to_file(filename);
     return 0;
