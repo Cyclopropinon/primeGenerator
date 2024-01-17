@@ -34,7 +34,7 @@ void write_primes_to_file(const std::string& filename)
 
     file.flush();                                                               // flush for safety
 
-    for (i; i <= limit; ++i)
+    for (i; i <= limit && i > sqlimit; ++i)                                     // Overflow-safe
     {
         if (sieve[i])
         {            
