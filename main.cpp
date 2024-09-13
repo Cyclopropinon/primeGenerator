@@ -58,28 +58,23 @@ void write_primes_to_file(const std::string& filename)
               << "ns\nTotal Time:\t" << total_duration << "ns" << std::endl;
 }
 
-void factorize(const std::string& filename)
+void factorize(const uint64_t& Zahl)
 {
     auto start_time = std::chrono::high_resolution_clock::now();
 
-    std::ofstream file(filename, std::ios::binary);
-    if (!file.is_open())
-    {
-        std::cerr << "Error opening file for writing.\n";
-        return;
-    }
-
-    constexpr uint32_t limit = std::numeric_limits<uint32_t>::max();
+    const uint32_t limit = ((uint32_t) std::sqrt(Zahl)) + 1;
     const uint32_t sqlimit = (uint32_t)std::sqrt(limit) + 1;
-    std::cout << limit << '\t' << sqlimit << std::endl;
+    std::cout << Zahl << '\t' << limit << '\t' << sqlimit << std::endl;
     std::vector<bool> sieve(limit, true);
     uint32_t i;
+    uint64_t Puffer = Zahl;
+    std::vector<uint64_t> Faktoren;
 
     for (i = 2; i <= sqlimit; ++i)
     {
         if (sieve[i])
         {
-            file.write(reinterpret_cast<const char*>(&i), sizeof(uint32_t));    // write primes to file
+            if(Puffer % i == 0) Faktoren.push_back(i);                          // Faktorisierung
             for (uint64_t j = i * i; j <= limit; j += i)                        // sieve out the numbers
             {
                 sieve[j] = false;
