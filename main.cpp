@@ -74,7 +74,7 @@ std::vector<uint64_t> factorize(const uint64_t& Zahl)
     {
         if (sieve[i])
         {
-            if(Puffer % i == 0)                                                 // Faktorisierung
+            while (Puffer % i == 0)                                             // Faktorisierung
             {
                 Faktoren.push_back(i);
                 Puffer /= i;
@@ -95,7 +95,7 @@ std::vector<uint64_t> factorize(const uint64_t& Zahl)
     {
         if (sieve[i])
         {
-            if(Puffer % i == 0)                                                 // Faktorisierung
+            while (Puffer % i == 0)                                             // Faktorisierung
             {
                 Faktoren.push_back(i);
                 Puffer /= i;
