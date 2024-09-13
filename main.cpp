@@ -58,12 +58,12 @@ void write_primes_to_file(const std::string& filename)
               << "ns\nTotal Time:\t" << total_duration << "ns" << std::endl;
 }
 
-void factorize(const uint64_t& Zahl)
+std::vector<uint64_t> factorize(const uint64_t& Zahl)
 {
     auto start_time = std::chrono::high_resolution_clock::now();
 
-    const uint32_t limit = ((uint32_t) std::sqrt(Zahl)) + 1;
-    const uint32_t sqlimit = (uint32_t)std::sqrt(limit) + 1;
+    uint32_t limit = ((uint32_t) std::sqrt(Zahl)) + 1;
+    uint32_t sqlimit = (uint32_t)std::sqrt(limit) + 1;
     std::cout << Zahl << '\t' << limit << '\t' << sqlimit << std::endl;
     std::vector<bool> sieve(limit, true);
     uint32_t i;
@@ -74,7 +74,13 @@ void factorize(const uint64_t& Zahl)
     {
         if (sieve[i])
         {
-            if(Puffer % i == 0) Faktoren.push_back(i);                          // Faktorisierung
+            if(Puffer % i == 0)                                                 // Faktorisierung
+            {
+                Faktoren.push_back(i);
+                Puffer /= i;
+                limit =  (uint32_t)std::sqrt(Puffer) + 1;
+                sqlimit = (uint32_t)std::sqrt(limit) + 1;
+            }
             for (uint64_t j = i * i; j <= limit; j += i)                        // sieve out the numbers
             {
                 sieve[j] = false;
@@ -83,27 +89,35 @@ void factorize(const uint64_t& Zahl)
     }
 
     auto sieve_finish_time = std::chrono::high_resolution_clock::now();
-    std::cout << "Finished sieving. Now writing to file." << std::endl;
-    file.flush();                                                               // flush for safety
+    std::cout << "Finished sieving. Now factorizing." << std::endl;
 
     for (i; i <= limit && i > sqlimit; ++i)                                     // Overflow-safe
     {
         if (sieve[i])
         {
-            file.write(reinterpret_cast<const char*>(&i), sizeof(uint32_t));    // write the rest of the primes to file
+            if(Puffer % i == 0)                                                 // Faktorisierung
+            {
+                Faktoren.push_back(i);
+                Puffer /= i;
+                limit =  (uint32_t)std::sqrt(Puffer) + 1;
+            }
         }
     }
 
-    file.close();
+    Faktoren.push_back(Puffer);
 
     auto finish_time = std::chrono::high_resolution_clock::now();
     auto sieve_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(sieve_finish_time - start_time).count();
     auto write_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - sieve_finish_time).count();
     auto total_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - start_time).count();
-    std::cout << "Prime numbers up to 2^32-1 written to \"" << filename
-              << "\"\nSieving Time:\t" << sieve_duration
+    std::cout << "Faktorisierung fertig: " << Zahl
+              << "\nFaktoren:";
+    for(auto f:Faktoren) std::cout << '\n' << f;
+    std::cout << "\nSieving Time:\t" << sieve_duration
               << "ns\nWriting Time:\t" << write_duration
               << "ns\nTotal Time:\t" << total_duration << "ns" << std::endl;
+
+    return Faktoren;
 }
 
 void writeReadme()
